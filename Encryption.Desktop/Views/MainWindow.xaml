@@ -1,0 +1,33 @@
+﻿<Window x:Class="Encryption.Desktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Click="ChooseFile" Margin="5">File</Button>
+            <TextBlock Grid.Column="1" Text="{Binding Path=FilePath, UpdateSourceTrigger=PropertyChanged}" Margin="5"></TextBlock>
+        </Grid>
+        <Button Grid.Row="1" Command="{Binding ExportKeysCommand}" Margin="5">Export Keys</Button>
+        <Button Grid.Row="2" Command="{Binding ImportKeysCommand}" Margin="5">Import Keys</Button>
+        <Button Grid.Row="3" Command="{Binding EncryptCommand}" Margin="5">Encrypt</Button>
+        <Button Grid.Row="4" Command="{Binding DecryptCommand}" Margin="5">Decrypt</Button>
+        <Button Grid.Row="5" Command="{Binding SwapKeysCommand}" Margin="5">Swap Keys</Button>
+        <TextBlock Grid.Row="6" Text="{Binding Milliseconds}" Margin="5"></TextBlock>
+    </Grid>
+</Window>
