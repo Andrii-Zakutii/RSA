@@ -10,8 +10,8 @@ namespace Encryption.Core
 
         public KeyPair GetRandomKeyPair()
         {
-            BigInteger p = _random.GetRandomPrimeNumber();
-            BigInteger q = _random.GetRandomPrimeNumber();
+            var p = _random.GetRandomPrimeNumber();
+            var q = _random.GetRandomPrimeNumber();
 
             var n = p * q;
             var fi = (p - 1) * (q - 1);
@@ -56,7 +56,7 @@ namespace Encryption.Core
 
         public BigInteger GetE(BigInteger fi)
         {
-            int sequenceNumber = 7;
+            int sequenceNumber = 70;
             int currentSequenceNumber = 0;
 
             for (int i = 2; i < fi; i++)

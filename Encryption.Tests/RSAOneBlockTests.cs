@@ -4,25 +4,25 @@ using Xunit;
 
 namespace Encryption.Tests
 {
-    public class RSABlockTests
+    public class RSAOneBlockTests
     {
         [Fact]
-        public void OneByteTestOnce() => Test(GetRandomMessage(1));
+        public void OneByteTestOnce() => EncryptDecryptTest(GetRandomMessage(1));
 
         [Fact]
-        public void OneByteTest() => Repeat(Test, GetRandomMessage(1), 100);
+        public void OneByteTest() => Repeat(EncryptDecryptTest, GetRandomMessage(1), 100);
 
         [Fact]
-        public void TwoByteTestOnce() => Test(GetRandomMessage(2));
+        public void TwoByteTestOnce() => EncryptDecryptTest(GetRandomMessage(2));
 
         [Fact]
-        public void TwoBytesTest() => Repeat(Test, GetRandomMessage(2), 100);
+        public void TwoBytesTest() => Repeat(EncryptDecryptTest, GetRandomMessage(2), 100);
 
         [Fact]
-        public void GeneralTestOnce() => Test(GetRandomMessage());
+        public void GeneralTestOnce() => EncryptDecryptTest(GetRandomMessage());
 
         [Fact]
-        public void GeneralTest() => Repeat(Test, GetRandomMessage(), 10);
+        public void GeneralTest() => Repeat(EncryptDecryptTest, GetRandomMessage(), 10);
 
         private void Repeat(Action<byte[]> action, byte[] message, int times)
         {
@@ -30,12 +30,10 @@ namespace Encryption.Tests
                 action(message);
         }
 
-        private void Test(byte[] message)
+        private void EncryptDecryptTest(byte[] message)
         {
             var keys = GetKeys();
-
             var decryptedMessage = EncryptThanDecrypt(message, keys);
-
             AssertEqualMessages(message, decryptedMessage);
         }
 
@@ -50,7 +48,7 @@ namespace Encryption.Tests
         private byte[] GetRandomMessage()
         {
             Random random = new Random();
-            int messageLength = random.Next(110, 130);
+            var messageLength = random.Next(110, 128);
             var message = GetRandomMessage(messageLength);
             return message;
         }
@@ -73,8 +71,8 @@ namespace Encryption.Tests
         private byte[] EncryptThanDecrypt(byte[] message, KeyPair keys)
         {
             var rsa = new RSA();
-            var encryptedMessage = rsa.DecryptBlock(message, keys.PublicKey);
-            var decryptedMessage = rsa.DecryptBlock(encryptedMessage, keys.PrivateKey);
+            var encryptedMessage = rsa.Encrypt(message, keys.PublicKey);
+            var decryptedMessage = rsa.Decrypt(encryptedMessage, keys.PrivateKey);
             return decryptedMessage;
         }
     }

@@ -9,8 +9,8 @@ namespace Encryption.Core.Extensions
         public static BigInteger GetRandomPrimeNumber(this Random random, int k = 500)
         {
             BigInteger baseNumber = 2;
-            BigInteger min = BigInteger.Pow(baseNumber, k);
-            BigInteger max = BigInteger.Pow(baseNumber, k + 1);
+            var min = BigInteger.Pow(baseNumber, k);
+            var max = BigInteger.Pow(baseNumber, k + 1);
 
             BigInteger guess = 1000000;
 

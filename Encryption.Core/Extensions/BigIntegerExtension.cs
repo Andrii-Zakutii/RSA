@@ -13,7 +13,7 @@ namespace Encryption.Core.Extensions
             if (value <= 1)
                 return false;
 
-            BigInteger d = value - 1;
+            var d = value - 1;
             int s = 0;
 
             while (d % 2 == 0)
@@ -22,7 +22,7 @@ namespace Encryption.Core.Extensions
                 s += 1;
             }
 
-            byte[] bytes = new byte[value.ToByteArray().LongLength];
+            var bytes = new byte[value.ToByteArray().LongLength];
             BigInteger a;
 
             Random random = new Random();
@@ -36,7 +36,7 @@ namespace Encryption.Core.Extensions
                 }
                 while (a < 2 || a >= value - 2);
 
-                BigInteger x = BigInteger.ModPow(a, d, value);
+                var x = BigInteger.ModPow(a, d, value);
 
                 if (x == 1 || x == value - 1)
                     continue;
