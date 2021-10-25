@@ -1,8 +1,12 @@
 ﻿using Encryption.Core;
+using Encryption.Core.EncryptionServices;
+using Encryption.Core.KeyGenerationServices;
+using Encryption.Desktop.Models;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using Key = Encryption.Core.Key;
@@ -11,19 +15,19 @@ namespace Encryption.Desktop.ViewModels
 {
     class MainViewModel : BaseViewModel
     {
-        private RSA _rsa = new RSA();
-        private KeysGenerator _keysGenerator = new KeysGenerator();
+        private readonly ICryptoService _cryptoService = new RSACryptoService();
         private string _filePath;
         private long _milliseconds;
         private KeyPair _keyPair;
 
         public MainViewModel()
         {
-            _keyPair = _keysGenerator.GetRandomKeyPair();
+            var keysGenerator = new CustomKeysGenerator();
+            _keyPair = keysGenerator.CreateKeyPair();
 
-            EncryptCommand = new Command(_ => EncodeFile(_keyPair.PublicKey, "Enciphered", "-enc-rsa", _rsa.DecryptBlock));
+            EncryptCommand = new Command(_ => ProcessFile(_keyPair.PublicKey, "-enc-rsa", CryptographicFunctionEnum.Encryption));
 
-            DecryptCommand = new Command(_ => EncodeFile(_keyPair.PrivateKey, "Deciphered", "-dec-rsa", _rsa.DecryptBlock));
+            DecryptCommand = new Command(_ => ProcessFile(_keyPair.PrivateKey, "-dec-rsa", CryptographicFunctionEnum.Decryption));
 
             ImportKeysCommand = new Command(_ =>
             {
@@ -32,6 +36,7 @@ namespace Encryption.Desktop.ViewModels
                     if (!TryOpenFile("Import RSA keys", out var rsaKeysPath))
                         return;
 
+                    _keyPair = (KeyPair)JsonSerializer.Deserialize(File.ReadAllText(rsaKeysPath), typeof(KeyPair));
                     MessageBox.Show($"Successfully imported RSA keys from '{rsaKeysPath}'");
                 }
                 catch (Exception ex)
@@ -47,12 +52,12 @@ namespace Encryption.Desktop.ViewModels
                 {
                     var saveFileDlg = new SaveFileDialog();
                     saveFileDlg.Title = "Export RSA keys";
-                    saveFileDlg.FileName = "RSA_Keys.xml";
+                    saveFileDlg.FileName = "RSA_Keys.json";
                     var dlgRes = saveFileDlg.ShowDialog();
 
                     if (dlgRes == true)
                     {
-                        //File.WriteAllText(saveFileDlg.FileName, );
+                        File.WriteAllText(saveFileDlg.FileName, JsonSerializer.Serialize(_keyPair));
                         MessageBox.Show($"File '{saveFileDlg.FileName}' saved.", "INFO");
                     }
                     else
@@ -67,22 +72,7 @@ namespace Encryption.Desktop.ViewModels
                 }
             });
 
-            SwapKeysCommand = new Command(_ =>
-            {
-                try
-                {
-                    if (_keyPair == null)
-                        throw new ArgumentNullException("Key pair is not generated");
-
-                    var buffer = _keyPair.PrivateKey;
-                    _keyPair.PrivateKey = _keyPair.PublicKey;
-                    _keyPair.PublicKey = buffer;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            });
+            SwapKeysCommand = new Command(_ => _keyPair = new KeyPair(_keyPair.PrivateKey, _keyPair.PublicKey));
         }
 
         public ICommand EncryptCommand { get; set; }
@@ -117,8 +107,7 @@ namespace Encryption.Desktop.ViewModels
             }
         }
 
-
-        private void EncodeFile(Key key, string message, string padding, Func<byte[], Key, byte[]> encodingFunction)
+        private void ProcessFile(Key key, string padding, CryptographicFunctionEnum functionType)
         {
             if (File.Exists(_filePath) == false)
             {
@@ -128,21 +117,25 @@ namespace Encryption.Desktop.ViewModels
 
             try
             {
+                var message = new Message(File.ReadAllBytes(_filePath));
+                var processFunction = GetProcessFunction(message, functionType);
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
-
-                var encodedFileContent = encodingFunction(File.ReadAllBytes(_filePath), key);
-
+                var processedFileContent = processFunction(_cryptoService, key);
                 stopWatch.Stop();
                 Milliseconds = stopWatch.ElapsedMilliseconds;
-
-                File.WriteAllBytes(PaddFilename(_filePath, padding), encodedFileContent);
-                MessageBox.Show(message, "RSA");
+                File.WriteAllBytes(PaddFilename(_filePath, padding), processedFileContent.Content);
+                MessageBox.Show("Done", "RSA");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "RSA");
             }
+        }
+
+        private Func<ICryptoService, Key, Message> GetProcessFunction(Message message, CryptographicFunctionEnum type)
+        {
+            return type == CryptographicFunctionEnum.Encryption ? message.Encrypt : message.Decrypt;
         }
 
         private bool TryOpenFile(string dlgTitle, out string filepath)

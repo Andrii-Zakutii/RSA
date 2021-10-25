@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using Encryption.Desktop.ViewModels;
+using Microsoft.Win32;
+using System.Windows;
 
 namespace Encryption.Desktop.Views
 {
@@ -10,6 +12,18 @@ namespace Encryption.Desktop.Views
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void ChooseFile(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog();
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+                var viewModel = (MainViewModel)DataContext;
+                viewModel.FilePath = filePath;
+            }
         }
     }
 }

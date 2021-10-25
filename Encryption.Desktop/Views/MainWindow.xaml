@@ -28,6 +28,13 @@
         <Button Grid.Row="3" Command="{Binding EncryptCommand}" Margin="5">Encrypt</Button>
         <Button Grid.Row="4" Command="{Binding DecryptCommand}" Margin="5">Decrypt</Button>
         <Button Grid.Row="5" Command="{Binding SwapKeysCommand}" Margin="5">Swap Keys</Button>
-        <TextBlock Grid.Row="6" Text="{Binding Milliseconds}" Margin="5"></TextBlock>
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Margin="5">Time:</TextBlock>
+            <TextBlock Grid.Column="1" Text="{Binding Milliseconds}" Margin="5"></TextBlock>
+        </Grid>
     </Grid>
 </Window>

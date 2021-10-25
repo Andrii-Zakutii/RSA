@@ -2,13 +2,13 @@
 using System;
 using System.Numerics;
 
-namespace Encryption.Core
+namespace Encryption.Core.KeyGenerationServices
 {
-    public class KeysGenerator
+    public class CustomKeysGenerator : IKeysGenerator
     {
         private readonly Random _random = new Random();
 
-        public KeyPair GetRandomKeyPair()
+        public KeyPair CreateKeyPair()
         {
             var p = _random.GetRandomPrimeNumber();
             var q = _random.GetRandomPrimeNumber();
@@ -18,19 +18,9 @@ namespace Encryption.Core
             var e = GetE(fi);
             var d = GetD(e, fi);
 
-            var publicKey = new Key
-            {
-                Exponent = e.ToByteArray(),
-                Module = n.ToByteArray()
-            };
-
-            var privateKey = new Key
-            {
-                Exponent = d.ToByteArray(),
-                Module = n.ToByteArray()
-            };
-
-            return new KeyPair { PrivateKey = privateKey, PublicKey = publicKey };
+            var publicKey = new Key(e.ToByteArray(), n.ToByteArray());
+            var privateKey = new Key(d.ToByteArray(), n.ToByteArray());
+            return new KeyPair(privateKey, publicKey);
         }
 
         public BigInteger GetD(BigInteger e, BigInteger module)
